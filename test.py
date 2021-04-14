@@ -35,7 +35,7 @@ def get_X(N: int):
 
 
 def get_bool_func(X_vector):
-    return (X_vector[0] + X_vector[1] + X_vector[3]) * X_vector[2]
+    return (X_vector[0] + X_vector[1] + X_vector[3]) * X_vector[2   ]
 
 
 print(get_X(4))
