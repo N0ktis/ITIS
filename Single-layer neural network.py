@@ -7,7 +7,7 @@ import plotly.graph_objs as go
 
 
 class Perceptron:
-    ET = 0.3
+    ETA = 0.3
 
     def __init__(self, N: int, d_activation_func, bool_func):
         self.N = N
@@ -30,9 +30,9 @@ class Perceptron:
             for i in range(len(X_set)):
                 net = self.__get_net(self.W, X_set[i])
                 delta = int(func[i]) - int(curr_F[i])
-                self.W[0] = self.__new_w(self.W[0], delta, True, net, i)
+                self.W[0] += self.__new_w(delta, True, net, i)
                 for j in range(1, self.N + 1):
-                    self.W[j] = self.__new_w(self.W[j], delta, X_set[i][j - 1], net, i)
+                    self.W[j] += self.__new_w(delta, X_set[i][j - 1], net, i)
             epoch += 1
             # print(epoch, '%', self.W)
         return E, E_stat
@@ -62,11 +62,8 @@ class Perceptron:
                     min_e_stat = e_stat
         print(min_comb, min_w, self.W)
 
-    def __get_w(self):
-        return self.W
-
-    def __new_w(self, w, delta: int, x: bool, net: int, i):
-        return w + self.ET * delta * x * self.d_activation_func(net)
+    def __new_w(self, delta: int, x: bool, net: int, i):
+        return self.ETA * delta * x * self.d_activation_func(net)
 
     @staticmethod
     def get_X_set(N: int):

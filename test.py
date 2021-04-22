@@ -1,7 +1,4 @@
-import itertools
-from math import exp
 import numpy as np
-
 
 
 def binary(a):
@@ -9,13 +6,11 @@ def binary(a):
     while a != 0:
         s += str(a % 2)
         a = a // 2
-    #print(s)
+    # print(s)
 
 
-binary(1)
-binary(0)
-binary(2)
-binary(7)
+summ = 12
+print(-summ)
 
 
 def get_X(N: int):
@@ -35,9 +30,11 @@ def get_X(N: int):
 
 
 def get_bool_func(X_vector):
-    return (X_vector[0] + X_vector[1] + X_vector[3]) * X_vector[2   ]
+    return (X_vector[0] + X_vector[1] + X_vector[3]) * X_vector[2]
 
 
-print(get_X(4))
-for i in get_X(4):
-    print(get_bool_func(i))
+a = [0, 1, 2, 3, 4, 5, 6]
+print(a)
+for i in range(len(a)):
+    a[i] += 1
+print(a)
