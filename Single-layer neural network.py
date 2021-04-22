@@ -25,7 +25,7 @@ class Perceptron:
             # print(curr_F)
             E = self.__get_E(curr_F, func)
             E_stat.append(E)
-            # print(E, epoch)
+            print(E, epoch)
 
             for i in range(len(X_set)):
                 net = self.__get_net(self.W, X_set[i])
@@ -128,7 +128,7 @@ def sigma_activation(net: int):
 
 
 def d_sigma_activation(net: int) -> float:
-    return (exp(net)) / (1 + exp(net)) ** 2  # я сразу упростил производную ФА, чтобы не делать лишних вызовов
+    return (exp(net)) / (1 + exp(-net)) ** 2  # я сразу упростил производную ФА, чтобы не делать лишних вызовов
 
 
 def get_bool_func(X_vector):

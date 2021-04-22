@@ -21,6 +21,7 @@ class Perceptron:
     @staticmethod
     def __get_net(W, input_set) -> int:
         net = W[0]
+        print(input_set)
         for i in range(1, len(W)):
             net += W[i] * input_set[i - 1]
         return net
@@ -74,12 +75,13 @@ class NeuralNetwork:
                 hidden = False
             self.__architecture[layer] = np.empty(self.model[layer + 1], object)
             self.__out_in_data[layer + 1] = np.empty(self.model[layer + 1], float)
+            print(self.__out_in_data,'55')
             self.__delta[layer] = np.empty(self.model[layer + 1], float)
             for neuron in range(len(self.__architecture[layer])):
                 self.__architecture[layer][neuron] = Perceptron(self.model[layer], activation_func, d_activation_func,
                                                                 hidden)
                 self.__out_in_data[layer + 1][neuron] = self.__architecture[layer][neuron].activate(
-                    self.__out_in_data[layer])
+                    self.__out_in_data[layer][neuron])
         print(self.__architecture)
 
     def learning(self, output_data):
@@ -87,6 +89,7 @@ class NeuralNetwork:
         epochs = 0
         # while E >= 0.0001:
         print(self.__delta, self.__delta[0][0])
+        print(self.__out_in_data,'^^')
         for neuron in range(len(self.__architecture[self.__layer_cnt - 1])):
             self.__delta[self.__layer_cnt - 1][neuron] = self.__architecture[self.__layer_cnt - 1][
                 neuron].get_delta(output_data[neuron], self.__out_in_data[self.__layer_cnt][neuron])
@@ -135,5 +138,5 @@ if __name__ == '__main__':
     # learning(N, F, linear_activation, d_linear_activation, True)
     # learning(N, F, sigma_activation, d_sigma_activation, True)
     A = NeuralNetwork([3, 3, 4])
-    A.build_nn(np.array([0.3, -0.1, 0.9]), activation_function, d_activation_function)
+    A.build_nn(np.array([np.array([0.3]), np.array([-0.1]), np.array([0.9])]), activation_function, d_activation_function)
     A.learning(np.array([0.1, -0.6, 0.2, 0.7]))
