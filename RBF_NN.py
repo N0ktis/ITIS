@@ -88,7 +88,7 @@ def gauss_activation(current, center):
     return np.exp(-sqr_sum)
 
 
-def linear_activation(net:) -> bool:
+def linear_activation(net:float) -> bool:
     return True if net >= 0 else False
 
 
