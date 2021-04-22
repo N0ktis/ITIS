@@ -15,8 +15,8 @@ class Perceptron:
             start_weight = 0.5
         self.W = np.array([start_weight for i in range(cnt_inputs + 1)])
 
-    def __new_w(self, delta: float, x: float, net: float):
-        return self.ETA * delta * x * self.__d_activation_func(net)
+    def __new_w(self, delta: float, x: float):
+        return Perceptron.ETA * delta * x
 
     @staticmethod
     def __get_net(W, input_set) -> int:
@@ -37,12 +37,12 @@ class Perceptron:
     def activate(self, input_set):
         return self.__activation_func(Perceptron.__get_net(self.W, input_set))
 
-    def set_weights(self, result, input_set):
-        delta = self.real_value - result
-        net = Perceptron.__get_net(self.W, input_set)
-        self.W[0] += self.__new_w(delta, True, net)
+    def set_weights(self, delta, input_set):
+        self.W[0] += self.__new_w(delta, 1)
+        print(self.__inputs, delta, input_set,self.W)
         for index in range(1, self.__inputs + 1):
-            self.W[index] += self.__new_w(delta, input_set[index - 1], net)
+            print(index)
+            self.W[index] += self.__new_w(delta, input_set[index - 1])
 
 
 class NeuralNetwork:
@@ -52,6 +52,7 @@ class NeuralNetwork:
         # self.cnt_outputs = model[len(model) - 1]
         # self.output_data = output_data
         # self.layers = model[1:len(model) - 2]
+        model[0] = model[1] // model[0]
         self.model = model
         self.__layer_cnt = len(model) - 1
         self.__architecture = np.empty(self.__layer_cnt, object)
@@ -99,10 +100,12 @@ class NeuralNetwork:
                                                                                                     neuron + 1] for
                                                                                                 elder_neurons in
                                                                                                 self.__architecture[
-                                                                                                    layer+1]]))
+                                                                                                    layer + 1]]))
         for layer in range(self.__layer_cnt):
             for neuron in range(len(self.__architecture[layer])):
-                p
+                self.__architecture[layer][neuron].set_weights(self.__delta[layer][neuron],
+                                                               self.__out_in_data[layer][neuron])
+                print(self.__architecture[layer][neuron].W)
         print(self.__delta)
 
 
