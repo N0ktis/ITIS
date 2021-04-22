@@ -88,7 +88,7 @@ def gauss_activation(current, center):
     return np.exp(-sqr_sum)
 
 
-def linear_activation(net:float) -> bool:
+def linear_activation(net: float) -> bool:
     return True if net >= 0 else False
 
 
@@ -108,18 +108,16 @@ def get_bool_func(X_vector):
     return (X_vector[0] + X_vector[1] + X_vector[3]) * X_vector[2]
 
 
-def main(N, bool_func):
+def learning(N, bool_func, activation_func, d_activation_func, built_graph=False):
     epochs = -1
     E = -1
     E_stat = []
-    rbf_neurons_center = get_cnt_hidden_neurons(bool_func)
     all_x_set = get_X_set(N)
+    rbf_neurons_center = get_cnt_hidden_neurons(bool_func)
     rbf_neurons_layer = np.empty(len(rbf_neurons_center), object)
     size_rbf_neurons_layer = len(rbf_neurons_layer)
     i = 0
-    print(rbf_neurons_layer)
-    # main_neuron = Perceptron(size_rbf_neurons_layer, linear_activation, d_linear_activation)
-    main_neuron = Perceptron(size_rbf_neurons_layer, sigma_activation, d_sigma_activation)
+    main_neuron = Perceptron(size_rbf_neurons_layer, activation_func, d_activation_func)
     for index in rbf_neurons_center:
         rbf_neurons_layer[i] = Perceptron(N, gauss_activation, real_value=all_x_set[index], hidden=True)
         i += 1
@@ -138,9 +136,12 @@ def main(N, bool_func):
         epochs += 1
         print(epochs, main_neuron.W, E)
         E_stat.append(E)
-    graph_builder(E_stat)
+    if built_graph:
+        graph_builder(E_stat)
 
 
 if __name__ == '__main__':
+    N = 4
     F = [False, False, False, True, False, False, True, True, False, False, True, True, False, False, True, True]
-    main(4, F)
+    learning(N, F, linear_activation, d_linear_activation, True)
+    learning(N, F, sigma_activation, d_sigma_activation, True)
