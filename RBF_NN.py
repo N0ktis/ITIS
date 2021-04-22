@@ -1,5 +1,5 @@
 from math import exp
-
+import prettytable
 import numpy as np
 import plotly.graph_objs as go
 
@@ -44,7 +44,7 @@ def graph_builder(E_stat):
     fig.add_trace(go.Scatter({'x': [i for i in range(len(E_stat))], 'y': E_stat, 'name': 'E'}))
     fig.update_layout(legend_orientation="h",
                       legend=dict(x=.5, xanchor="center"),
-                      title='График суммарной ошибки НС по эпохам обучения',
+                      title='График суммарной ошибки НС по эпохам обучения при сигмоидальной ФА',
                       xaxis_title='Эпохи',
                       yaxis_title='Суммарная ошибка',
                       margin=dict(l=0, r=0, t=30, b=0))
@@ -109,18 +109,22 @@ def get_bool_func(X_vector):
 
 
 def learning(N, bool_func, activation_func, d_activation_func, built_graph=False):
-    epochs = -1
-    E = -1
-    E_stat = []
+    table = prettytable.PrettyTable()
+    table.field_names = ["Эпоха", "W0", "W1","W2","W3","W4","W5","W6","W7","E"]
+    epochs = 0
+    E = 7
+    E_stat = [7]
     all_x_set = get_X_set(N)
     rbf_neurons_center = get_cnt_hidden_neurons(bool_func)
     rbf_neurons_layer = np.empty(len(rbf_neurons_center), object)
     size_rbf_neurons_layer = len(rbf_neurons_layer)
     i = 0
     main_neuron = Perceptron(size_rbf_neurons_layer, activation_func, d_activation_func)
+    table.add_row([epochs, *main_neuron.W, E])
     for index in rbf_neurons_center:
         rbf_neurons_layer[i] = Perceptron(N, gauss_activation, real_value=all_x_set[index], hidden=True)
         i += 1
+
     while E != 0:
         E = 0
         for x_set, value in zip(all_x_set, bool_func):
@@ -128,14 +132,13 @@ def learning(N, bool_func, activation_func, d_activation_func, built_graph=False
             fi_set = np.empty(size_rbf_neurons_layer, float)
             for index in range(size_rbf_neurons_layer):
                 fi_set[index] = rbf_neurons_layer[index].activate(x_set)
-            # print(fi_set,'!')
             result = main_neuron.activate(fi_set)
             main_neuron.set_weights(result, fi_set)
-            print(result, value)
             E += (0 if value == result else 1)
         epochs += 1
-        print(epochs, main_neuron.W, E)
+        table.add_row([epochs, *main_neuron.W, E])
         E_stat.append(E)
+    print(table)
     if built_graph:
         graph_builder(E_stat)
 
@@ -143,5 +146,5 @@ def learning(N, bool_func, activation_func, d_activation_func, built_graph=False
 if __name__ == '__main__':
     N = 4
     F = [False, False, False, True, False, False, True, True, False, False, True, True, False, False, True, True]
-    learning(N, F, linear_activation, d_linear_activation, True)
+    #learning(N, F, linear_activation, d_linear_activation, True)
     learning(N, F, sigma_activation, d_sigma_activation, True)
