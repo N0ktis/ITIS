@@ -1,5 +1,6 @@
 import numpy as np
 import plotly.graph_objs as go
+import prettytable
 
 
 class Perceptron:
@@ -21,7 +22,6 @@ class Perceptron:
     @staticmethod
     def __get_net(W, input_set) -> int:
         net = W[0]
-        print(input_set)
         for i in range(1, len(W)):
             net += W[i] * input_set[i - 1]
         return net
@@ -40,7 +40,6 @@ class Perceptron:
 
     def set_weights(self, delta, input_set):
         self.W[0] += self.__new_w(delta, 1)
-        print(self.__inputs, delta, input_set,self.W)
         for index in range(1, self.__inputs + 1):
             print(index)
             self.W[index] += self.__new_w(delta, input_set[index - 1])
@@ -48,11 +47,6 @@ class Perceptron:
 
 class NeuralNetwork:
     def __init__(self, model):
-        # self.cnt_inputs = model[0]
-        # self.input_data = input_data
-        # self.cnt_outputs = model[len(model) - 1]
-        # self.output_data = output_data
-        # self.layers = model[1:len(model) - 2]
         model[0] = model[1] // model[0]
         self.model = model
         self.__layer_cnt = len(model) - 1
@@ -75,41 +69,40 @@ class NeuralNetwork:
                 hidden = False
             self.__architecture[layer] = np.empty(self.model[layer + 1], object)
             self.__out_in_data[layer + 1] = np.empty(self.model[layer + 1], float)
-            print(self.__out_in_data,'55')
             self.__delta[layer] = np.empty(self.model[layer + 1], float)
             for neuron in range(len(self.__architecture[layer])):
                 self.__architecture[layer][neuron] = Perceptron(self.model[layer], activation_func, d_activation_func,
                                                                 hidden)
                 self.__out_in_data[layer + 1][neuron] = self.__architecture[layer][neuron].activate(
                     self.__out_in_data[layer][neuron])
-        print(self.__architecture)
 
     def learning(self, output_data):
         E = self.__get_E(self.__out_in_data[self.__layer_cnt], output_data)
         epochs = 0
-        # while E >= 0.0001:
-        print(self.__delta, self.__delta[0][0])
-        print(self.__out_in_data,'^^')
-        for neuron in range(len(self.__architecture[self.__layer_cnt - 1])):
-            self.__delta[self.__layer_cnt - 1][neuron] = self.__architecture[self.__layer_cnt - 1][
-                neuron].get_delta(output_data[neuron], self.__out_in_data[self.__layer_cnt][neuron])
-        for layer in range(self.__layer_cnt - 2, -1, -1):
-            for neuron in range(len(self.__architecture[layer])):
-                self.__delta[layer][neuron] = self.__architecture[layer][neuron].get_delta(self.__delta[layer + 1],
-                                                                                           self.__out_in_data[
-                                                                                               layer + 1][neuron],
-                                                                                           np.array(
-                                                                                               [elder_neurons.W[
-                                                                                                    neuron + 1] for
-                                                                                                elder_neurons in
-                                                                                                self.__architecture[
-                                                                                                    layer + 1]]))
-        for layer in range(self.__layer_cnt):
-            for neuron in range(len(self.__architecture[layer])):
-                self.__architecture[layer][neuron].set_weights(self.__delta[layer][neuron],
-                                                               self.__out_in_data[layer][neuron])
-                print(self.__architecture[layer][neuron].W)
-        print(self.__delta)
+        while E >= 0.0001:
+
+            for neuron in range(len(self.__architecture[self.__layer_cnt - 1])):
+                self.__delta[self.__layer_cnt - 1][neuron] = self.__architecture[self.__layer_cnt - 1][
+                    neuron].get_delta(output_data[neuron], self.__out_in_data[self.__layer_cnt][neuron])
+            for layer in range(self.__layer_cnt - 2, -1, -1):
+                for neuron in range(len(self.__architecture[layer])):
+                    self.__delta[layer][neuron] = self.__architecture[layer][neuron].get_delta(self.__delta[layer + 1],
+                                                                                               self.__out_in_data[
+                                                                                                   layer + 1][neuron],
+                                                                                               np.array([
+                                                                                                            elder_neurons.W[
+                                                                                                                neuron + 1]
+                                                                                                            for
+                                                                                                            elder_neurons
+                                                                                                            in
+                                                                                                            self.__architecture[
+                                                                                                                layer + 1]]))
+            for layer in range(self.__layer_cnt):
+                for neuron in range(len(self.__architecture[layer])):
+                    self.__architecture[layer][neuron].set_weights(self.__delta[layer][neuron],
+                                                                   self.__out_in_data[layer][neuron])
+            E = self.__get_E(self.__out_in_data[self.__layer_cnt], output_data)
+            epochs += 1
 
 
 def graph_builder(E_stat):
@@ -129,14 +122,10 @@ def activation_function(net: int) -> bool:
 
 
 def d_activation_function(f_net: float) -> float:
-    return 0.5 * (1 - f_net ** 2)  # я сразу упростил производную ФА, чтобы не делать лишних вызовов
+    return 0.5 * (1 - f_net ** 2)
 
 
 if __name__ == '__main__':
-    # N = 4
-    # F = [False, False, False, True, False, False, True, True, False, False, True, True, False, False, True, True]
-    # learning(N, F, linear_activation, d_linear_activation, True)
-    # learning(N, F, sigma_activation, d_sigma_activation, True)
-    A = NeuralNetwork([3, 3, 4])
-    A.build_nn(np.array([np.array([0.3]), np.array([-0.1]), np.array([0.9])]), activation_function, d_activation_function)
-    A.learning(np.array([0.1, -0.6, 0.2, 0.7]))
+    A = NeuralNetwork([1, 1, 3])
+    A.build_nn(np.array([np.array([-2])]), activation_function, d_activation_function)
+    A.learning(np.array([0.2, 0.1, 0.3]))

@@ -1,7 +1,7 @@
 import copy
 from itertools import combinations
 from math import exp
-
+import prettytable
 import numpy as np
 import plotly.graph_objs as go
 
@@ -9,23 +9,27 @@ import plotly.graph_objs as go
 class Perceptron:
     ETA = 0.3
 
-    def __init__(self, N: int, d_activation_func, bool_func):
+    def __init__(self, N: int, activation_func, d_activation_func, bool_func):
         self.N = N
+        self.activation_func = activation_func
         self.d_activation_func = d_activation_func
         self.bool_func = bool_func
         self.W = np.array([0. for i in range(N + 1)])
         self.X_set = self.get_X_set(N)
 
-    def learn(self, func, X_set, max_epoch=np.inf):
+    def learn(self, func, X_set, max_epoch=np.inf, build_table=True):
         E_stat = []
         E = -1
         epoch = 0
-        while E != 0 or epoch == max_epoch:
-            curr_F = self.__get_curr_F(X_set, self.W)
-            # print(curr_F)
+        if build_table:
+            table = prettytable.PrettyTable()
+            table.field_names = ["Эпоха", "W0", "W1", "W2", "W3", "W4", "Y", "E"]
+        while E != 0 and epoch != max_epoch:
+            curr_F = self.__get_curr_F(self.activation_func, X_set, self.W)
             E = self.__get_E(curr_F, func)
             E_stat.append(E)
-            print(E, epoch)
+            if build_table:
+                table.add_row([epoch, *self.W, curr_F, E])
 
             for i in range(len(X_set)):
                 net = self.__get_net(self.W, X_set[i])
@@ -34,14 +38,15 @@ class Perceptron:
                 for j in range(1, self.N + 1):
                     self.W[j] += self.__new_w(delta, X_set[i][j - 1], net, i)
             epoch += 1
-            # print(epoch, '%', self.W)
-        return E, E_stat
+        if build_table:
+            print(table)
+        return E_stat, epoch
 
     def get_min_vector(self, func, max_epoch=400):
         min_len_comb = 2 ** self.N + 1
         min_comb = None
-        min_e_stat = []
         min_w = None
+        min_epoch = max_epoch
         j = 0
         for i in range(1, 2 ** self.N):
             if i > min_len_comb:
@@ -53,14 +58,16 @@ class Perceptron:
                 min_func.fill(False)
                 for k in range(i):
                     min_func[k] = self.bool_func(X_comb[k])
-                E, e_stat = self.learn(min_func, X_comb, max_epoch)
-                if self.__get_E(self.__get_curr_F(self.X_set, self.W), func) == 0 and len(X_comb) < min_len_comb:
+                e_stat, epoch = self.learn(min_func, X_comb, max_epoch, build_table=False)
+                if self.__get_E(self.__get_curr_F(self.activation_func, self.X_set, self.W), func) == 0 and len(
+                        X_comb) < min_len_comb:
                     min_len_comb = len(X_comb)
                     min_comb = X_comb
+                    min_epoch = epoch
                     min_w = copy.copy(self.W)
-                    print(min_comb, min_w, self.W, min_len_comb)
-                    min_e_stat = e_stat
-        print(min_comb, min_w, self.W)
+        print("Минимальный набор:", *min_comb)
+        print("Количество эпох обучения:", min_epoch)
+        print("Значения весов:", min_w)
 
     def __new_w(self, delta: int, x: bool, net: int, i):
         return self.ETA * delta * x * self.d_activation_func(net)
@@ -96,10 +103,10 @@ class Perceptron:
         return E
 
     @staticmethod
-    def __get_curr_F(X_set, W):
+    def __get_curr_F(actvivation_function, X_set, W):
         curr_F = np.empty(len(X_set), bool)
         for i in range(len(X_set)):
-            curr_F[i] = (True if Perceptron.__get_net(W, X_set[i]) >= 0 else False)
+            curr_F[i] = (True if actvivation_function(Perceptron.__get_net(W, X_set[i])) >= 0.5 else False)
         return curr_F
 
 
@@ -124,11 +131,11 @@ def d_linear_activation(net: int) -> int:
 
 
 def sigma_activation(net: int):
-    return 1 / (1 + exp(net))
+    return 1 / (1 + exp(-net))
 
 
 def d_sigma_activation(net: int) -> float:
-    return (exp(net)) / (1 + exp(-net)) ** 2  # я сразу упростил производную ФА, чтобы не делать лишних вызовов
+    return (exp(-net)) / (1 + exp(-net)) ** 2  # я сразу упростил производную ФА, чтобы не делать лишних вызовов
 
 
 def get_bool_func(X_vector):
@@ -137,9 +144,13 @@ def get_bool_func(X_vector):
 
 if __name__ == '__main__':
     F = [False, False, False, True, False, False, True, True, False, False, True, True, False, False, True, True]
-    A = Perceptron(4, d_linear_activation, get_bool_func)
-    A.learn(np.array(F), A.get_X_set(4))
-    B = Perceptron(4, d_sigma_activation, get_bool_func)
-    B.learn(np.array(F), B.get_X_set(4))
-    A.get_min_vector(np.array(F))
-    B.get_min_vector(np.array(F))
+    A = Perceptron(4, linear_activation, d_linear_activation, get_bool_func)
+    graph_builder((A.learn(np.array(F), A.get_X_set(4)))[0])
+    B = Perceptron(4, sigma_activation, d_sigma_activation, get_bool_func)
+    graph_builder((B.learn(np.array(F), B.get_X_set(4), 100))[0])
+    C = Perceptron(4, linear_activation, d_linear_activation, get_bool_func)
+    D = Perceptron(4, sigma_activation, d_sigma_activation, get_bool_func)
+    print("ПОРОГОВАЯ ФА")
+    C.get_min_vector(np.array(F))
+    print("СИГМОИДАЛЬНАЯ ФА")
+    D.get_min_vector(np.array(F))
