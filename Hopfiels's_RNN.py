@@ -18,6 +18,8 @@ class RecurrentNeuralNetwork:
                 for value in study_data:
                     init_value += value[weight_num] * value[perceptron_num]
                 self.layer[perceptron_num].w[weight_num] = init_value
+
+        print("Weight matrix:")
         for perceptron in self.layer:
             print(perceptron.w)
 
@@ -73,6 +75,7 @@ def get_image(px_data_array, height, weight):
                 image_line.append('□')
         print(*image_line)
         image_line.clear()
+    print()
 
 
 if __name__ == '__main__':
@@ -85,17 +88,19 @@ if __name__ == '__main__':
     L_false = [1, -1, -1, -1, 1, -1, -1, -1, -1, 1, -1, -1, -1, -1, 1]
     A = RecurrentNeuralNetwork(15)
     A.learn(study_set)
+
+    print('Spoiled "J"')
     get_image(J_false, 5, 3)
-    print('---------------')
+    print('Restored "J"')
     A.restoring(J_false)
     get_image(A.output, 5, 3)
-    print('------------------------------')
+    print('Spoiled "K"')
     get_image(K_false, 5, 3)
-    print('---------------')
+    print('Restored "K"')
     A.restoring(K_false)
     get_image(A.output, 5, 3)
-    print('------------------------------')
+    print('Spoiled "L"')
     get_image(L_false, 5, 3)
-    print('---------------')
+    print('Restored "L"')
     A.restoring(L_false)
     get_image(A.output, 5, 3)
