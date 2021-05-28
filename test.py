@@ -1,4 +1,5 @@
 import numpy as np
+import json
 
 
 def binary(a):
@@ -34,3 +35,6 @@ def get_X(N: int):
 def get_bool_func(X_vector):
     return (X_vector[0] + X_vector[1] + X_vector[3]) * X_vector[2]
 
+js=open('data-4905-2021-03-09.json')
+rjs=json.load(js)
+print(rjs[0])
