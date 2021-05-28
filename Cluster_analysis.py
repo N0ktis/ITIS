@@ -1,6 +1,7 @@
 import json
 
 import numpy as np
+import prettytable
 
 
 class Neuron:
@@ -15,7 +16,7 @@ class Neuron:
 class KohonenNeuralNetwork:
     def __init__(self, cluster_radius):
         self.radius = cluster_radius
-        self.koh_layer = []  # np.empty(capacity, dtype=object)
+        self.koh_layer = []
 
     def get_clusters(self, data, cluster_feature):
         if len(self.koh_layer) == 0:
@@ -39,19 +40,25 @@ class KohonenNeuralNetwork:
 
 
 def print_clusters(NN):
-    pass
+    table = prettytable.PrettyTable()
+    for cluster in NN.koh_layer:
+        print("\nCluster's center:", cluster.center, "Cluster's size:", len(cluster.data))
+        table.field_names = ["ID", "Address", "Car capacity"]
+        for value in cluster.data:
+            table.add_row([value['ID'], value['Address'], value['CarCapacity']])
+        print(table)
+        table.clear()
 
 
-def get_data(file_path):
-    pass
+def get_data(file_path, sample_size):
+    json_file = open(file_path)
+    data = json.load(json_file)
+    return data[:sample_size]
 
 
 if __name__ == '__main__':
-    js = open('data-4905-2021-03-09.json')
-    rjs = json.load(js)
-    A = KohonenNeuralNetwork(0)
-    A.get_clusters(rjs[:20], 'CarCapacity')
-    for i in A.koh_layer:
-        print(i.center)
-        for j in i.data:
-            print(j['ID'], j['CarCapacity'])
+    data = get_data('data-4905-2021-03-09.json', 200)
+    radius = 5
+    A = KohonenNeuralNetwork(radius)
+    A.get_clusters(data, 'CarCapacity')
+    print_clusters(A)
