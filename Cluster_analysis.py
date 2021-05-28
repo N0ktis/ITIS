@@ -19,6 +19,8 @@ class KohonenNeuralNetwork:
         self.koh_layer = []
 
     def get_clusters(self, data, cluster_feature):
+        if len(data) == 0:
+            return
         if len(self.koh_layer) == 0:
             self.koh_layer.append(Neuron(data[0][cluster_feature]))
 

@@ -1,5 +1,6 @@
-import numpy as np
 import json
+
+import numpy as np
 
 
 def binary(a):
@@ -35,6 +36,21 @@ def get_X(N: int):
 def get_bool_func(X_vector):
     return (X_vector[0] + X_vector[1] + X_vector[3]) * X_vector[2]
 
-js=open('data-4905-2021-03-09.json')
-rjs=json.load(js)
-print(rjs[0])
+
+js = open('data-4905-2021-03-09.json')
+rjs = json.load(js)
+length = len(rjs)
+summa = 0
+maxxx = -1
+minnn = 90000000
+"""for value in rjs:
+    if value['CarCapacity'] >= maxxx:
+        maxxx = value['CarCapacity']
+    if value['CarCapacity'] < minnn:
+        minnn = value['CarCapacity']
+    summa += value['CarCapacity']
+print(rjs[0]['CarCapacity'])
+print(summa / length, maxxx,minnn)"""
+
+for i in range(20):
+    print(rjs[i]['CarCapacity'], rjs[i])
